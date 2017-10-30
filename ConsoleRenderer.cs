@@ -6,22 +6,22 @@ namespace GameOf2048
     public class ConsoleRenderer : IGameRenderer
     {
         
-        public void DrawBoard(int[][] Board, int score)
+        public void DrawBoard(int[][] board, int score)
         {
             Console.Clear();
 
             StringBuilder output = new StringBuilder();
             int cellWidth = 8;
-            int numOfCells = Board.Length;
+            int numOfCells = board.Length;
             output.Append(CreateLine(cellWidth, numOfCells));
             // draw numbers
-            for (int i = 0; i < Board.Length; i++)
+            for (int i = 0; i < board.Length; i++)
             {
-                for (int j = 0; j < Board[i].Length; j++)
+                for (int j = 0; j < board[i].Length; j++)
                 {
                     output.Append("|");
-                    string number = Board[i][j].ToString();
-                    output.Append(number.PadLeft(cellWidth - 1 - number.Length));
+                    string number = board[i][j].ToString();
+                    output.Append(number.PadLeft(cellWidth - 2));
                     output.Append(" ");
 
                 }
