@@ -59,15 +59,9 @@ namespace GameOf2048
 
             // The move is only valid if the state of the board has changed.
             if (BoardEquals(prevBoard, board))
-            {
                 return -1;
-            }
             else 
-            {
-                // spawn a new number in case of a valid move
-                SpawnNumber(board);
                 return mergedValue;
-            }
         }
 
         public Boolean NoMovesPossible(int[][] board)

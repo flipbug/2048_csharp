@@ -81,16 +81,16 @@ namespace GameOf2048
                 }
             }
 
-            if (emptyTiles < 2)
+            /*if (emptyTiles < 2)
                 return 6;
-
+            */
             if (emptyTiles < 4)
-                return 5;
-
-            if (emptyTiles < 6)
                 return 4;
 
-            return 3;
+            if (emptyTiles < 6)
+                return 3;
+
+            return 2;
         }
     }
 }

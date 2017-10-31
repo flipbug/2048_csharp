@@ -54,6 +54,8 @@ namespace GameOf2048
                 var mergedValue = engine.ExecuteMove(move, Board);
 
                 if (mergedValue >= 0) {
+                    // spawn a new number in case of a valid move
+                    engine.SpawnNumber(Board);
                     Score += mergedValue;
                 } else if (engine.NoMovesPossible(Board)) {
                     State = GameState.GAMEOVER;

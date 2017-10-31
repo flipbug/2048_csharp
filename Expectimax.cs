@@ -10,13 +10,14 @@ namespace GameOf2048
 
         private int maxDepth;
 
-        private double[,] TileWeights = new double[,] {{16, 12, 10, 8},
-                                                        {1, 2, 4, 6},
-                                                        {0.8, 0.6, 0.4, 0.2},
-                                                        {0.04, 0.06, 0.08, 0.1}};
+        private double[,] TileWeights = new double[,] {{16,15,14,13},
+                                                        {9,10,11,12},
+                                                        {8,7,6,5},
+                                                        {1,2,3,4}};
 
 
-        public Expectimax(int maxDepth) {
+        public Expectimax(int maxDepth)
+        {
             this.engine = new Engine();
             this.maxDepth = maxDepth;
         }
@@ -25,50 +26,47 @@ namespace GameOf2048
         {
             // Wrapper method to start the search tree for a single move.
             // This way we can use it together with mutlithreading.
-            score = MaxNode(move, board, 0);
-        }
-
-        private double MaxNode(Moves move, int[][] board, int depth)
-        {
-            double score = 0, chance_one = 0, chance_two = 0;
             int[][] newBoard = Engine.CopyBoard(board);
             int mergedValue = engine.ExecuteMove(move, newBoard);
 
-            // If the mergedValue is -1 the move was invalid.
-            if (mergedValue < 0)
-                return 0;
+            if (!Engine.BoardEquals(newBoard, board))
+                score = Math.Max(score, ChanceNode(newBoard, 0));
+            else
+                score = 0;
+        }
 
-            depth++;
+        private double ChanceNode(int[][] board, int depth)
+        {
+            double score = 0;
 
             // Stop if the state of the board has not changed or 
             // the maximum depth has been reached.
-            if (Engine.BoardEquals(newBoard, board) || depth >= maxDepth)
-                return CalculateScore(newBoard);
+            if (depth >= maxDepth)
+                return CalculateScore(board);
 
             // Go futher down the tree. Each empty field has a chance of spawing a number,
             // so we have to create a new branch for every possibility.
             // List<int[]> emptyTiles = new List<int[]>();
-            for (int i = 0; i < newBoard.Length; i++)
+            for (int i = 0; i < board.Length; i++)
             {
-                for (int j = 0; j < newBoard[i].Length; j++)
+                for (int j = 0; j < board[i].Length; j++)
                 {
-                    if (newBoard[i][j] == 0)
+                    
+                    if (board[i][j] == 0)
                     {
                         // The number 2 has a chance of 90% to appear next, while 4 has only 10%
-                        newBoard[i][j] = 2;
-                        chance_one = ChanceNode(0.9, Engine.CopyBoard(newBoard), depth);
+                        board[i][j] = 2;
+                        score += MoveNode(Engine.CopyBoard(board), depth) * 0.9;
 
                         // Optimization: Ignore the 4 branch for deep trees
-                        if (maxDepth < 5) {
-                            newBoard[i][j] = 4;
-                            chance_two = ChanceNode(0.1, Engine.CopyBoard(newBoard), depth);
+                        if (maxDepth < 5)
+                        {
+                            board[i][j] = 4;
+                            score += MoveNode(Engine.CopyBoard(board), depth) * 0.1;
                         }
 
                         // Reset the field
-                        newBoard[i][j] = 0;
-
-                        // Use the highest score.
-                        score = Math.Max(score, Math.Max(chance_one, chance_two));
+                        board[i][j] = 0;
                     }
                 }
             }
@@ -76,23 +74,25 @@ namespace GameOf2048
             return score;
         }
 
-        private double ChanceNode(double chance, int[][] board, int depth)
+        private double MoveNode(int[][] board, int depth)
         {
             double score = 0;
-
-            // Each new chance node has four possible moves. We sum the scores for each move 
-            // together and multiply it by the chance value. 
+            depth++;
             for (int i = 0; i < 4; i++)
             {
-                score += MaxNode((Moves)i, board, depth);
+                int[][] newBoard = Engine.CopyBoard(board);
+                int mergedValue = engine.ExecuteMove((Moves)i, newBoard);
+                if (!Engine.BoardEquals(newBoard, board))
+                    score = Math.Max(score, ChanceNode(newBoard, depth));
             }
 
-            return score * chance;
+            return score;
         }
 
         private double CalculateScore(int[][] board)
         {
             double score = 0;
+            double value = 0;
             int emptyTiles = 0;
 
             // Calculate the heuristic value of the given board. 
@@ -100,13 +100,36 @@ namespace GameOf2048
             {
                 for (int j = 0; j < board[i].Length; j++)
                 {
+                    value = 0;
                     if (board[i][j] == 0)
+                    {
                         emptyTiles++;
+                    }
                     else
-                        score += board[i][j] * board[i][j] * TileWeights[i, j];
+                    {
+                        value = board[i][j];
+
+                        
+                        // bonus if prev > current > next
+                        if (j > 0 && board[i][j - 1] > value)
+                            value *= 2;
+                        if (j < board[i].Length - 1 && board[i][j + 1] < value)
+                            value *= board[i][j + 1] == board[i][j] / 2 ? 4 : 2;
+
+                        // bonus if above > current > below
+                        if (i > 0 && board[i - 1][j] > value)
+                            value *= 2;
+                        if (i < board.Length - 1 && board[i + 1][j] < value)
+                            value *= 2;
+                        
+
+                        score += value * TileWeights[i, j];
+
+                    }
                 }
             }
-            return score * Math.Max(emptyTiles, 1);
+            // return emptyTiles;
+            return score * (emptyTiles * emptyTiles);
         }
     }
 }
