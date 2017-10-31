@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace GameOf2048
 {
     public class AiPlayer : IPlayer
-    {        
+    {
 
         public Moves MakeMove(int[][] board)
         {
@@ -42,7 +42,7 @@ namespace GameOf2048
             threads.ForEach(x => x.Join());
 
             double bestScore = 0;
-            double[] scores = new double[]{score1, score2, score3, score4};
+            double[] scores = new double[] { score1, score2, score3, score4 };
 
             for (int i = 0; i < scores.Length; i++)
             {
@@ -52,16 +52,19 @@ namespace GameOf2048
                     bestScore = scores[i];
                     move = (Moves)i;
                 }
+
+                Console.WriteLine($"Calculated Score: {scores[i]}");
+                Console.WriteLine($"Move: {(Moves)i}");
             }
+
+            Console.WriteLine($"Best Score: {bestScore}");
 
             // Random move as ugly fallback to make the last move.
-            if (bestScore == 0) {
+            if (bestScore == 0)
+            {
                 Random rd = new Random();
-                move = (Moves) rd.Next(0,3);
+                move = (Moves)rd.Next(0, 3);
             }
-
-            Console.WriteLine($"Calculated Score: {bestScore}");
-            Console.WriteLine($"Move: {move}");
 
             return move;
         }
@@ -78,7 +81,16 @@ namespace GameOf2048
                 }
             }
 
-            return emptyTiles < 5 ? 4 : 3;
+            if (emptyTiles < 2)
+                return 6;
+
+            if (emptyTiles < 4)
+                return 5;
+
+            if (emptyTiles < 6)
+                return 4;
+
+            return 3;
         }
     }
 }

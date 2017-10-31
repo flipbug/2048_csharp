@@ -8,12 +8,12 @@ namespace GameOf2048
     {
         private Engine engine;
 
-        private int maxDepth = 4;
+        private int maxDepth;
 
-        private double[,] TileWeights = new double[,] {{10, 6, 4, 2},
-                                                        {6, 1, 1, 1},
-                                                        {4, 1, 0.5, 0.5},
-                                                        {2, 1, 0.5, 0.1}};
+        private double[,] TileWeights = new double[,] {{16, 12, 10, 8},
+                                                        {1, 2, 4, 6},
+                                                        {0.8, 0.6, 0.4, 0.2},
+                                                        {0.04, 0.06, 0.08, 0.1}};
 
 
         public Expectimax(int maxDepth) {
@@ -32,7 +32,11 @@ namespace GameOf2048
         {
             double score = 0, chance_one = 0, chance_two = 0;
             int[][] newBoard = Engine.CopyBoard(board);
-            engine.ExecuteMove(move, newBoard);
+            int mergedValue = engine.ExecuteMove(move, newBoard);
+
+            // If the mergedValue is -1 the move was invalid.
+            if (mergedValue < 0)
+                return 0;
 
             depth++;
 
@@ -48,13 +52,17 @@ namespace GameOf2048
             {
                 for (int j = 0; j < newBoard[i].Length; j++)
                 {
-                    if (board[i][j] == 0)
+                    if (newBoard[i][j] == 0)
                     {
                         // The number 2 has a chance of 90% to appear next, while 4 has only 10%
                         newBoard[i][j] = 2;
-                        chance_one = ChanceNode(0.9, newBoard, depth);
-                        newBoard[i][j] = 4;
-                        chance_two = ChanceNode(0.1, newBoard, depth);
+                        chance_one = ChanceNode(0.9, Engine.CopyBoard(newBoard), depth);
+
+                        // Optimization: Ignore the 4 branch for deep trees
+                        if (maxDepth < 5) {
+                            newBoard[i][j] = 4;
+                            chance_two = ChanceNode(0.1, Engine.CopyBoard(newBoard), depth);
+                        }
 
                         // Reset the field
                         newBoard[i][j] = 0;
@@ -95,11 +103,10 @@ namespace GameOf2048
                     if (board[i][j] == 0)
                         emptyTiles++;
                     else
-                        score += board[i][j] * 2 * TileWeights[i, j];
+                        score += board[i][j] * board[i][j] * TileWeights[i, j];
                 }
             }
-
-            return score * emptyTiles;
+            return score * Math.Max(emptyTiles, 1);
         }
     }
 }
