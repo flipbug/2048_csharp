@@ -7,8 +7,8 @@ namespace GameOf2048
     {
         public Boolean SpawnNumber(int[][] board)
         {
+            // Spawn a 2 or 4 on a random empty field
             List<int[]> empty_tiles = new List<int[]>();
-
             for (int i = 0; i < board.Length; i++)
             {
                 for (int j = 0; j < board[i].Length; j++)
@@ -62,8 +62,10 @@ namespace GameOf2048
             {
                 return -1;
             }
-            else
+            else 
             {
+                // spawn a new number in case of a valid move
+                SpawnNumber(board);
                 return mergedValue;
             }
         }
@@ -79,19 +81,34 @@ namespace GameOf2048
             return mergedValue < 0;
         }
 
-        public Boolean BoardEquals(int[][] boardA, int[][] boardB)
+        public Boolean MovePossible(Moves move, int[][] board)
+        {
+            int[][] newBoard = CopyBoard(board);
+            ExecuteMove(move, newBoard);
+            return !BoardEquals(newBoard, board);
+        }
+
+        public static Boolean BoardEquals(int[][] boardA, int[][] boardB)
         {
             for (int i = 0; i < boardA.Length; i++)
             {
                 for (int j = 0; j < boardA[i].Length; j++)
                 {
                     if (boardA[i][j] != boardB[i][j])
-                    {
                         return false;
-                    }
                 }
             }
             return true;
+        }
+
+        public static int[][] CopyBoard(int[][] source)
+        {
+            int[][] dest = new int[source.Length][];
+            for (int i = 0; i < source.Length; i++)
+            {
+                dest[i] = (int[])source[i].Clone();
+            }
+            return dest;
         }
 
         private int MergeLeft(int[][] board)
@@ -238,16 +255,6 @@ namespace GameOf2048
             {
                 board[i] = tmpBoard[i];
             }
-        }
-
-        private int[][] CopyBoard(int[][] source)
-        {
-            int[][] dest = new int[source.Length][];
-            for (int i = 0; i < source.Length; i++)
-            {
-                dest[i] = (int[])source[i].Clone();
-            }
-            return dest;
         }
     }
 }

@@ -20,7 +20,7 @@ namespace GameOf2048
                 for (int j = 0; j < board[i].Length; j++)
                 {
                     output.Append("|");
-                    string number = board[i][j].ToString();
+                    string number = board[i][j] > 0 ? board[i][j].ToString() : " ";
                     output.Append(number.PadLeft(cellWidth - 2));
                     output.Append(" ");
 

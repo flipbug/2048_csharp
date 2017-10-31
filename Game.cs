@@ -6,7 +6,7 @@ namespace GameOf2048
 
     public enum GameState { PLAY, WIN, GAMEOVER }
 
-    public enum Moves { UP, DOWN, LEFT, RIGHT }
+    public enum Moves { UP = 0, DOWN, LEFT, RIGHT }
 
     class Game
     {
@@ -48,14 +48,13 @@ namespace GameOf2048
             {
                 renderer.DrawBoard(Board, Score);
                 
-                var move = player.MakeMove();
+                var move = player.MakeMove(Board);
 
                 // If the returned value equals -1, the move was invalid.
                 var mergedValue = engine.ExecuteMove(move, Board);
 
                 if (mergedValue >= 0) {
                     Score += mergedValue;
-                    engine.SpawnNumber(Board);
                 } else if (engine.NoMovesPossible(Board)) {
                     State = GameState.GAMEOVER;
                 }
@@ -65,8 +64,10 @@ namespace GameOf2048
         static void Main(string[] args)
         {
             IGameRenderer renderer = new ConsoleRenderer();
-            IPlayer player = new ConsolePlayer();
-            Game game = new Game(renderer, player);
+            // IPlayer player = new ConsolePlayer();
+
+            IPlayer ai = new AiPlayer();
+            Game game = new Game(renderer, ai);
 
             game.Start();
         }

@@ -2,6 +2,6 @@ namespace GameOf2048
 {
     public interface IPlayer
     {
-        Moves MakeMove();
+        Moves MakeMove(int[][] board);
     }
 }

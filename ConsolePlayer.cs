@@ -4,7 +4,7 @@ namespace GameOf2048
 {
     public class ConsolePlayer : IPlayer
     {
-        public Moves MakeMove()
+        public Moves MakeMove(int[][] board)
         {
             while(true)
             {
