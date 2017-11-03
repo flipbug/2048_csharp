@@ -82,7 +82,7 @@ namespace GameOf2048
             }
 
             /*if (emptyTiles < 2)
-                return 6;
+                return 5;
             */
             if (emptyTiles < 4)
                 return 4;
